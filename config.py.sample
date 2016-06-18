@@ -1,0 +1,16 @@
+class Base(object):
+    TXTLIST_PTAH = '/path/to/gfwlist.txt'
+    G2D_PTAH = '/path/to/g2d/g2d.py'
+
+class Test(Base):
+    DEBUG = True
+
+
+class Product(Base):
+    pass
+
+
+configs = {
+    'product': Product,
+    'test': Test
+}
