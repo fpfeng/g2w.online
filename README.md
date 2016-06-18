@@ -13,7 +13,7 @@
 http类型把`s`改成`h`即可。
           
 可以用加号组合（最多10个）：            
-[https://g2w.online/pac/s,192.168.1.1:1080+h,127.0.0.1:1080](https://g2w.online/pac/s,192.168.1.1:1080)     
+[https://g2w.online/pac/s,192.168.1.1:1080+h,127.0.0.1:1080](https://g2w.online/pac/s,192.168.1.1:1080+h,127.0.0.1:1080)     
 
 ## dnsmasq + ipset
 `https://g2w.online` + `/ipset/` + `ipset名称 逗号 IP 冒号 端口`          
