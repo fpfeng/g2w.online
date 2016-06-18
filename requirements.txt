@@ -1,0 +1,8 @@
+click==6.6
+Flask==0.11.1
+genpac==1.4.0
+IPy==0.83
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+Werkzeug==0.11.10
