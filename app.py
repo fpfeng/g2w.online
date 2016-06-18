@@ -2,7 +2,8 @@ import subprocess
 import shlex
 import re
 import os
-from flask import Flask, make_response, abort, current_app, redirect
+from flask import Flask, make_response, abort, current_app,\
+        redirect, render_template
 from IPy import IP
 from utils import ListConverter
 from config import configs
@@ -15,7 +16,7 @@ app.url_map.converters['list'] = ListConverter
 
 @app.route('/')
 def index():
-    return redirect("https://github.com/fpfeng/g2w.online", code=302)
+    return render_template('index.html')
 
 
 @app.route('/ipset/<path:args>')
