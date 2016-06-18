@@ -8,7 +8,7 @@
 [https://g2w.online/pac/s,192.168.1.1:1080](https://g2w.online/pac/s,192.168.1.1:1080)               
 
 
-包含`SOCKS5`和`SOCKS`两条参数，safari可以正常使用。
+内含`SOCKS5`和`SOCKS`两条参数，safari可以正常使用。
         
 http类型把`s`改成`h`即可。
           
@@ -24,6 +24,6 @@ http类型把`s`改成`h`即可。
 ## 单 dnsmasq
 `https://g2w.online/` + `/dnsq/` + ` IP 冒号 端口`               
 举例，`127.0.0.1:1053`：            
-[https://g2w.online/dnsq/127.0.0.1:1053](https://g2w.online/ipset/127.0.0.1:1053)        
+[https://g2w.online/dnsq/127.0.0.1:1053](https://g2w.online/dnsq/127.0.0.1:1053)        
 ## 其它
 等待添加
