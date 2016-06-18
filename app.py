@@ -1,9 +1,16 @@
 import subprocess
 import shlex
 import re
+import os
+from flask import Flask, make_response, abort, current_app, redirect
 from IPy import IP
-from flask import make_response, abort, current_app, redirect
-from . import app
+from utils import ListConverter
+from config import configs
+
+
+app = Flask(__name__)
+app.config.from_object(configs[os.environ.get('g2pconf', 'test')])
+app.url_map.converters['list'] = ListConverter
 
 
 @app.route('/')
@@ -122,3 +129,7 @@ def create_proxy_arg(p_type, addr):
     else:
         arg = 'PROXY ' + addr
     return arg
+
+
+if __name__ == '__main__':
+    app.run()
