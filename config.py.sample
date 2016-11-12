@@ -1,6 +1,6 @@
 class Base(object):
     TXTLIST_PTAH = '/path/to/gfwlist.txt'
-    G2D_PTAH = '/path/to/g2d/g2d.py'
+    G2D_PTAH = '/path/to/g2d/g2d.py' # https://github.com/fpfeng/gfwlist2dnsmasq
 
 class Test(Base):
     DEBUG = True
