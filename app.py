@@ -2,8 +2,7 @@ import subprocess
 import shlex
 import re
 import os
-from flask import Flask, make_response, abort, current_app,\
-        redirect, render_template
+from flask import Flask, make_response, abort, current_app, render_template
 from IPy import IP
 from utils import ListConverter
 from config import configs
@@ -21,28 +20,28 @@ def index():
 
 @app.route('/ipset/<path:args>')
 def ipset(args):
-    name_addr = args.split(',')
-    name, addr = name_addr
-    if len(name_addr) == 2 and check_valid_ipset(name, addr):
-        ip, port = addr.split(':')
-        command = create_cmd_str(ip, port, name)
-        try:
+    try:
+        name_addr = args.split(',')
+        name, addr = name_addr
+        if len(name_addr) == 2 and check_valid_ipset(name, addr):
+            ip, port = addr.split(':')
+            command = create_cmd_str(ip, port, name)
             return maek_resp_from_stdout(command, name + '_ipset.conf')
-        except subprocess.CalledProcessError:
-            abort(404)
-    abort(404)
+        abort(404)
+    except:
+        abort(404)
 
 
 @app.route('/dnsq/<path:args>')
 def dnsq(args):
-    ip, port = args.split(':')
-    if check_addr(ip, port):
-        command = create_cmd_str(ip, port)
-        try:
+    try:
+        ip, port = args.split(':')
+        if check_addr(ip, port):
+            command = create_cmd_str(ip, port)
             return maek_resp_from_stdout(command, 'gfwlist_dnsmasq.conf')
-        except subprocess.CalledProcessError:
-            abort(404)
-    abort(404)
+        abort(404)
+    except:
+        abort(404)
 
 
 def maek_resp_from_stdout(cmd, filename):
@@ -80,24 +79,26 @@ def check_valid_ipset(name, addr):
 
 @app.route('/pac/<list:proxies>')
 def pac(proxies):
-    if len(proxies) <= 10:
-        all_args = []
-        for p in proxies:
-            pass_check, arg = check_vaild_pac(p.split(','))
-            if pass_check:
-                all_args.append(arg)
-        to_str = '"' + '; '.join(all_args) + '"'
-        command = shlex.split(
-                        'genpac --gfwlist-url="-" ' +
-                        '--gfwlist-local=' +
-                        current_app.config['TXTLIST_PTAH'] +
-                        ' -p ' +
-                        to_str)
-        try:
+    try:
+        if len(proxies) <= 10:
+            all_args = []
+            for p in proxies:
+                pass_check, arg = check_vaild_pac(p.split(','))
+                if pass_check:
+                    all_args.append(arg)
+            to_str = '"' + '; '.join(all_args) + '"'
+            command = shlex.split(
+                            'genpac --gfwlist-url="-" ' +
+                            '--gfwlist-local=' +
+                            current_app.config['TXTLIST_PTAH'] +
+                            ' -p ' +
+                            to_str +
+                            ' --user-rule="||naver.jp"')
+
             return maek_resp_from_stdout(command, 'gfwlist.pac')
-        except subprocess.CalledProcessError:
-            abort(404)
-    abort(404)
+        abort(404)
+    except:
+        abort(404)
 
 
 def check_vaild_pac(type_addr):
@@ -113,7 +114,7 @@ def check_vaild_pac(type_addr):
 
 def check_addr(ip, port):
     pass_check = True
-    if 0 < int(port) < 65536:
+    if ip and port and 0 < int(port) < 65536:
         try:
             _ = IP(ip)
         except ValueError:
