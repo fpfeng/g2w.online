@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,21 +11,16 @@
     <title>g2w.online</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="//cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/github-fork-ribbon-css/0.2.1/gh-fork-ribbon.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
   <link rel=stylesheet type=text/css href="{{ url_for('static', filename='cover.css') }}">
-
   </head>
-
   <body>
-<a href="https://github.com/fpfeng/g2w.online"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+    <a class="github-fork-ribbon right-top" href="https://github.com/fpfeng/g2w.online" title="Fork me on GitHub">Fork me on GitHub</a>
     <div class="site-wrapper">
-
       <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-
+        <div class="cover-container" id="app">
           <div class="masthead clearfix">
             <div class="inner">
               <h3 class="masthead-brand">功夫网列表转换</h3>
@@ -34,98 +28,94 @@
               </nav>
             </div>
           </div>
-
           <div class="inner cover">
-            <p>选择输出</p>
-            <div class="radio-group list-radio">
-              <label class="radio-inline"><input class="show-btn" id="pac" type="radio" name="optradio">pac</label>
-              <label class="radio-inline"><input class="show-btn" id="dnsq" type="radio" name="optradio">dnsmasq</label>
-              <label class="radio-inline"><input class="show-btn" id="ipset" type="radio" name="optradio">dnsmasq + ipset</label>
+            <label class="custom-control custom-radio">
+              <input v-model="outputOption" id="pac" value="pac" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">pac</span>
+            </label>
+            <label class="custom-control custom-radio">
+              <input v-model="outputOption" id="dnsq" value="dnsq" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">dnsmasq</span>
+            </label>
+            <label class="custom-control custom-radio">
+              <input v-model="outputOption" id="ipset" value="ipset" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">dnsmasq + ipset</span>
+            </label>
             </div>
 
-            <div class="input-group to-hide pac-input" type="pac">
-                <select class="form-control pac-type">
-                    <option value="s">socks/socks5 类型</option>
-                    <option value="h">http/https 类型</option>
+          <div class="text-center">
+            <form class="form-inline centered" style="display: inline-block;" v-show="outputOption == 'pac'">
+                <select v-model="pacArgs.type" class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
+                    <option value="s">socks/socks5</option>
+                    <option value="h">http/https</option>
                 </select>
-                <span class="input-group-addon" title="IP">代理IP:</span>
-                <input class="form-control pac-addr" value="127.0.0.1">
-                <span class="input-group-addon">代理端口:</span>
-                <input class="form-control pac-port" value="1080">
-            </div>
-            <div class="input-group to-hide ipset-input" type="ipset">
-                <span class="input-group-addon" title="IP">ipset名称:</span>
-                <input class="form-control ipset-name" value="tsilwfg">
-                <span class="input-group-addon" title="IP">代理IP:</span>
-                <input class="form-control ipset-addr" value="127.0.0.1">
-                <span class="input-group-addon">代理端口:</span>
-                <input class="form-control ipset-port" value="1080">
-            </div>
+                <input style="width: 200px;" v-model="pacArgs.addr" placeholder="代理地址" type="text" class="form-control mb-2 mr-sm-2 mb-sm-0 addr-input">
+                <input style="width: 100px;" v-model="pacArgs.port" placeholder="代理端口" type="text" class="form-control mb-1 mr-sm-1 mb-sm-0 port-input">
+            </form>
+            <form class="form-inline centered" style="display: inline-block;" v-show="outputOption == 'ipset'">
+                <input v-model="ipsetArgs.name" placeholder="ipset名称" style="width: 150px;" class="form-control">
+                <input v-model="ipsetArgs.addr" placeholder="代理地址" style="width: 200px;" class="form-control">
+                <input v-model="ipsetArgs.port" placeholder="代理端口" style="width: 100px;" class="form-control">
+            </form>
 
-            <div class="input-group to-hide dnsq-input" type="dnsq">
-                <span class="input-group-addon" title="IP">代理IP:</span>
-                <input class="form-control dnsq-addr" value="127.0.0.1">
-                <span class="input-group-addon">代理端口:</span>
-                <input class="form-control dnsq-port" value="1080">
-            </div>
-
-            <div class="gen-btn-wrap" style="margin: 20px 0;">
-              <button class="gen-btn btn btn-primary">生成链接</button>
-            </div>
-
-            <div>
-              <strong><a class="output-a text-danger" href='#' style="display: none;"></a></strong>
-              <p class="tips" style="display: none; margin-top: 10px;">在你本地保存以上链接(定时更新之类)，随时访问，随时下载，不需要再来这里生成。当参数输入错误时，服务器会返回404错误。</p>
-            </div>
-
+            <form class="form-inline centered" style="display: inline-block;" v-show="outputOption == 'dnsq'">
+                <input style="width: 200px;" v-model="dnsqArgs.addr" placeholder="代理地址" class="form-control mb-2 mr-sm-2 mb-sm-0">
+                <input style="width: 100px;" v-model="dnsqArgs.port" placeholder="代理端口" class="form-control mb-2 mr-sm-2 mb-sm-0">
+            </form>
           </div>
-
-
+            <div style="margin-top: 10px;">
+              {% raw %}
+              <strong>
+                <a class="output-a text-danger" v-bind:href="downloadUrl" v-show="outputOption">{{ downloadUrl }}</a>
+              </strong>
+              {% endraw %}
+              <p class="tips" v-show="outputOption" style="margin-top: 10px; color: #666;">
+              在你本地保存以上链接(定时更新之类)，随时访问，随时下载，不需要再来这里生成。当参数输入错误时，服务器会返回404错误。</p>
+            </div>
+          </div>
         </div>
-
       </div>
-
     </div>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
+    <script src="//cdn.bootcss.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+    <script src="//cdn.bootcss.com/vue/2.3.2/vue.min.js"></script>
     <script>
-        $(document).ready(function() {
-          $('.gen-btn').hide();
-          $('.to-hide').hide();
-          $('.show-btn').click(function() {
-            var to_show_div = '.' + $(this).prop('id') + '-input';
-            $('.to-hide').hide().removeClass('gen-me');
-            $(to_show_div).show().addClass('gen-me').prop('gen-type', 'xx');;
-            $('.gen-btn').show();
-          });
-        });
-
-        function editLink(url) {
-          $('.output-a').prop('href', url).text(url).show();
-          $('.tips').show();
-        };
-
-
-        $(document).on('click', '.gen-btn', function() {
-            var div = $('.gen-me');
-            var type = $(div).attr('type');
-            var addr = $('.' + type + '-addr').val();
-            var port = $('.' + type + '-port').val();
-            if (type == 'pac') {
-              var ptype = $('.pac-type').val();
-              editLink('https://g2w.online/pac/' + ptype + ',' + addr + ':' + port);
-            } else if (type == 'ipset') {
-              var name = $('.ipset-name').val();
-              editLink('https://g2w.online/ipset/' + name + ',' + addr + ':' + port);
-            } else if (type == 'dnsq') {
-              editLink('https://g2w.online/dnsq/' + addr + ':' + port);
+      var app = new Vue({
+        el: '#app',
+        data: {
+          outputOption: '',
+          pacArgs: {
+            'type': 's',
+            'addr': '127.0.0.1',
+            'port': 1024
+          },
+          dnsqArgs: {
+            'addr': '127.0.0.1',
+            'port': 1024
+          },
+          ipsetArgs: {
+            'name': 'tsilwfg',
+            'addr': '127.0.0.1',
+            'port': 1024
+          },
+        },
+        computed: {
+          downloadUrl: function() {
+            base = 'https://g2w.online/' + this.outputOption + '/'
+            if (this.outputOption == 'pac') {
+              return base + this.pacArgs.type + ',' + this.pacArgs.addr + ':' + this.pacArgs.port
+            } else if (this.outputOption == 'dnsq') {
+              return base + this.dnsqArgs.addr + ':' + this.dnsqArgs.port
+            } else if (this.outputOption == 'ipset') {
+              return base + this.ipsetArgs.name + ',' + this.ipsetArgs.addr + ':' + this.ipsetArgs.port
             }
-        });
+          }
+        }
+      })
     </script>
   </body>
 </html>

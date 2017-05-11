@@ -23,7 +23,7 @@ def ipset(args):
     try:
         name_addr = args.split(',')
         name, addr = name_addr
-        if len(name_addr) == 2 and check_valid_ipset(name, addr):
+        if name and addr and check_valid_ipset(name, addr):
             ip, port = addr.split(':')
             command = create_cmd_str(ip, port, name)
             return maek_resp_from_stdout(command, name + '_ipset.conf')

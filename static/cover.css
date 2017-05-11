@@ -165,3 +165,11 @@ body {
 .list-radio {
   margin-bottom: 20px;
 }
+
+.port-input {
+  width: 100px;
+}
+
+.addr-input {
+  width: 250px;
+}
