@@ -9,7 +9,6 @@
     <meta name="author" content="">
 
     <title>g2w.online</title>
-
     <!-- Bootstrap core CSS -->
     <link href="//cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="//cdn.bootcss.com/github-fork-ribbon-css/0.2.1/gh-fork-ribbon.min.css" rel="stylesheet">
@@ -32,17 +31,22 @@
             <label class="custom-control custom-radio">
               <input v-model="outputOption" id="pac" value="pac" type="radio" class="custom-control-input">
               <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">pac</span>
+              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'pac' ? '#555' : 'white' }">pac</span>
             </label>
             <label class="custom-control custom-radio">
               <input v-model="outputOption" id="dnsq" value="dnsq" type="radio" class="custom-control-input">
               <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">dnsmasq</span>
+              <span class="custom-control-description" v-bind:style="{ color: outputOption != '' && outputOption != 'dnsq' ? '#555' : 'white' }">dnsmasq</span>
             </label>
             <label class="custom-control custom-radio">
               <input v-model="outputOption" id="ipset" value="ipset" type="radio" class="custom-control-input">
               <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">dnsmasq + ipset</span>
+              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'ipset' ? '#555' : 'white' }">dnsmasq + ipset</span>
+            </label>
+            <label class="custom-control custom-radio">
+              <input v-model="outputOption" id="potatso" value="potatso" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'potatso' ? '#555' : 'white' }">potatso</span>
             </label>
             </div>
 
@@ -65,6 +69,19 @@
                 <input style="width: 200px;" v-model="dnsqArgs.addr" placeholder="代理地址" class="form-control mb-2 mr-sm-2 mb-sm-0">
                 <input style="width: 100px;" v-model="dnsqArgs.port" placeholder="代理端口" class="form-control mb-2 mr-sm-2 mb-sm-0">
             </form>
+
+            <div style="display: inline-block; width: 300px;" v-show="outputOption == 'potatso'">
+            <label class="custom-control custom-radio">
+              <input v-model="potatsoArgs.file" id="p-proxy" value="proxy.conf" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">代理</span>
+            </label>
+            <label class="custom-control custom-radio">
+              <input v-model="potatsoArgs.file" id="p-direct" value="direct.conf" type="radio" class="custom-control-input">
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">国内白名单(没啥用)</span>
+            </label>
+            </div>
           </div>
             <div style="margin-top: 10px;">
               {% raw %}
@@ -72,6 +89,9 @@
                 <a class="output-a text-danger" v-bind:href="downloadUrl" v-show="outputOption">{{ downloadUrl }}</a>
               </strong>
               {% endraw %}
+            <div style="margin: 10px;" v-show="outputOption == 'potatso' && potatsoArgs.file">
+             <qrcode :val="downloadUrl" :size="size" :bg-color="bgColor" :fg-color="fgColor" level="L"></qrcode>
+            </div>
               <p class="tips" v-show="outputOption" style="margin-top: 10px; color: #666;">
               在你本地保存以上链接(定时更新之类)，随时访问，随时下载，不需要再来这里生成。当参数输入错误时，服务器会返回404错误。</p>
             </div>
@@ -80,11 +100,14 @@
       </div>
     </div>
 
-    <script src="//cdn.bootcss.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
     <script src="//cdn.bootcss.com/vue/2.3.2/vue.min.js"></script>
+    <script src="https://oc6029ro6.qnssl.com/static/vue-qrcode.min.js"></script>
     <script>
       var app = new Vue({
         el: '#app',
+        components: {
+          qrcode: VueQr
+        },
         data: {
           outputOption: '',
           pacArgs: {
@@ -101,6 +124,12 @@
             'addr': '127.0.0.1',
             'port': 1024
           },
+          potatsoArgs: {
+            'file': 'proxy.conf',
+          },
+          bgColor: "white",
+          fgColor: "black",
+          size: 125,
         },
         computed: {
           downloadUrl: function() {
@@ -111,6 +140,8 @@
               return base + this.dnsqArgs.addr + ':' + this.dnsqArgs.port
             } else if (this.outputOption == 'ipset') {
               return base + this.ipsetArgs.name + ',' + this.ipsetArgs.addr + ':' + this.ipsetArgs.port
+            } else if (this.outputOption == 'potatso' && this.potatsoArgs.file) {
+              return base + this.potatsoArgs.file
             }
           }
         }
