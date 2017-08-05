@@ -71,26 +71,16 @@
             </form>
 
             <div style="display: inline-block; width: 300px;" v-show="outputOption == 'potatso'">
-            <label class="custom-control custom-radio">
-              <input v-model="potatsoArgs.file" id="p-proxy" value="proxy.conf" type="radio" class="custom-control-input">
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">代理</span>
-            </label>
-            <label class="custom-control custom-radio">
-              <input v-model="potatsoArgs.file" id="p-direct" value="direct.conf" type="radio" class="custom-control-input">
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">国内白名单(没啥用)</span>
-            </label>
             </div>
           </div>
-            <div style="margin-top: 10px;">
+            <div v-bind:style="{ marginTop: outputOption == 'potatso' ? '-20px' : '10px' }">
               {% raw %}
               <strong>
                 <a class="output-a text-danger" v-bind:href="downloadUrl" v-show="outputOption">{{ downloadUrl }}</a>
               </strong>
               {% endraw %}
-            <div style="margin: 10px;" v-show="outputOption == 'potatso' && potatsoArgs.file">
-             <qrcode :val="downloadUrl" :size="size" :bg-color="bgColor" :fg-color="fgColor" level="L"></qrcode>
+            <div style="margin: 10px;" v-show="outputOption == 'potatso'">
+            <qrcode :val="downloadUrl" :size="size" :bg-color="bgColor" :fg-color="fgColor" level="L"></qrcode>
             </div>
               <p class="tips" v-show="outputOption" style="margin-top: 10px; color: #666;">
               在你本地保存以上链接(定时更新之类)，随时访问，随时下载，不需要再来这里生成。当参数输入错误时，服务器会返回404错误。</p>
@@ -125,11 +115,11 @@
             'port': 1024
           },
           potatsoArgs: {
-            'file': 'proxy.conf',
+            'file': 'rules.conf',
           },
           bgColor: "white",
           fgColor: "black",
-          size: 125,
+          size: 180,
         },
         computed: {
           downloadUrl: function() {
