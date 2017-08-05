@@ -28,26 +28,15 @@
             </div>
           </div>
           <div class="inner cover">
+            {% raw %}
+            <template v-for="option in radioOptions">
             <label class="custom-control custom-radio">
-              <input v-model="outputOption" id="pac" value="pac" type="radio" class="custom-control-input">
+              <input v-model="outputOption" v-bind:value=option.value type="radio" class="custom-control-input">
               <span class="custom-control-indicator"></span>
-              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'pac' ? '#555' : 'white' }">pac</span>
+              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != option.value ? '#555' : 'white' }">{{ option.title }}</span>
             </label>
-            <label class="custom-control custom-radio">
-              <input v-model="outputOption" id="dnsq" value="dnsq" type="radio" class="custom-control-input">
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description" v-bind:style="{ color: outputOption != '' && outputOption != 'dnsq' ? '#555' : 'white' }">dnsmasq</span>
-            </label>
-            <label class="custom-control custom-radio">
-              <input v-model="outputOption" id="ipset" value="ipset" type="radio" class="custom-control-input">
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'ipset' ? '#555' : 'white' }">dnsmasq + ipset</span>
-            </label>
-            <label class="custom-control custom-radio">
-              <input v-model="outputOption" id="potatso" value="potatso" type="radio" class="custom-control-input">
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description"  v-bind:style="{ color: outputOption != '' && outputOption != 'potatso' ? '#555' : 'white' }">potatso</span>
-            </label>
+            </template>
+            {% endraw %}
             </div>
 
           <div class="text-center">
@@ -99,6 +88,12 @@
           qrcode: VueQr
         },
         data: {
+          radioOptions: [
+            {'value': 'pac', 'title': 'pac'},
+            {'value': 'dnsq', 'title': 'dnsmasq'},
+            {'value': 'ipset', 'title': 'dnsmasq + ipset'},
+            {'value': 'potatso', 'title': 'potatso'},
+          ],
           outputOption: '',
           pacArgs: {
             'type': 's',
@@ -117,8 +112,8 @@
           potatsoArgs: {
             'file': 'rules.conf',
           },
-          bgColor: "white",
-          fgColor: "black",
+          bgColor: "yellow",
+          fgColor: "#666",
           size: 180,
         },
         computed: {
