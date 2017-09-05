@@ -38,7 +38,7 @@ class SimpleTest(unittest.TestCase):
         self.assertEqual(404, resp.status_code)
 
     def test_ipset_invalid_port(self):
-        resp = self.test_client.get(url_for('ipset', args='setname,127.0.0.1:999999'))
+        resp = self.test_client.get(url_for('ipset', args='setname,127.0.0.1:65536'))
         self.assertEqual(404, resp.status_code)
 
     def test_dnsmasq(self):

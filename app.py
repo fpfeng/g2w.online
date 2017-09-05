@@ -4,8 +4,12 @@ import re
 import os
 from IPy import IP
 from flask import Flask, make_response, abort, current_app, render_template
-from utils import ListConverter
+from utils import ListConverter, abort_when_error
 from config import configs
+
+
+IPSET_NAME_MAX = 20
+PAC_MAX_CHAIN_PROXIES = 20
 
 
 app = Flask(__name__)
@@ -19,97 +23,76 @@ def index():
 
 
 @app.route('/ipset/<path:args>')
+@abort_when_error
 def ipset(args):
-    try:
-        name_addr = args.split(',')
-        name, addr = name_addr
-        if name and addr and check_valid_ipset(name, addr):
-            ip, port = addr.split(':')
-            command = create_cmd_str(ip, port, name)
-            return maek_resp_from_stdout(command, name + '_ipset.conf')
-        abort(404)
-    except:
-        abort(404)
+    name, addr = args.split(',')
+    if name and addr and check_valid_ipset(name, addr):
+        return make_resp_with_cmd_stdout(
+                    create_cmd(*addr.split(':'), name=name), name + '_ipset.conf')
+    abort(404)
+
+
+def check_valid_ipset(name, addr):
+    return len(name) <= IPSET_NAME_MAX and re.match("^[a-zA-Z0-9_]*$", name)\
+            and check_addr(*addr.split(':'))
 
 
 @app.route('/dnsq/<path:args>')
+@abort_when_error
 def dnsq(args):
-    try:
-        ip, port = args.split(':')
-        if check_addr(ip, port):
-            command = create_cmd_str(ip, port)
-            return maek_resp_from_stdout(command, 'gfwlist_dnsmasq.conf')
-        abort(404)
-    except:
-        abort(404)
+    ip, port = args.split(':')
+    if check_addr(ip, port):
+        return make_resp_with_cmd_stdout(create_cmd(ip, port), 'gfwlist_dnsmasq.conf')
+    abort(404)
 
 
-def maek_resp_from_stdout(cmd, filename):
-    stdout = subprocess.check_output(cmd)
-    resp = make_response(stdout)
+def make_resp_with_cmd_stdout(cmd, filename):
+    resp = make_response(subprocess.check_output(cmd))
     resp.headers["Content-Disposition"] = \
         'attachment; filename=' + filename
     return resp
 
 
-def create_cmd_str(ip, port, name=None):
-    command = shlex.split(
-              current_app.config['G2D_PTAH'] +
-              ' -l ' +
-              current_app.config['TXTLIST_PTAH'] +
-              ' -d ' +
-              ip +
-              ' -p ' +
-              port +
-              ' -o -')
-    if not name:  # without ipset
-        command += ['-i', '-']
-    else:  # with ipset
-        command += ['-i', name]
+def create_cmd(ip, port, name=None):
+    command = shlex.split(' '.join([
+                            current_app.config['G2D_PTAH'],
+                            '-l',
+                            current_app.config['TXTLIST_PTAH'],
+                            '-d',
+                            ip,
+                            '-p',
+                            port,
+                            '-o -',
+            ]))
+    if not name:  # without ipset name
+        command.extend(['-i', '-'])
+    else:
+        command.extend(['-i', name])
     return command
 
 
-def check_valid_ipset(name, addr):
-    pass_check = False
-    if len(name) <= 20 and re.match("^[a-zA-Z0-9_]*$", name)\
-            and check_addr(*addr.split(':')):
-            pass_check = True
-    return pass_check
-
-
 @app.route('/pac/<list:proxies>')
+@abort_when_error
 def pac(proxies):
-    try:
-        if len(proxies) <= 10:
-            all_args = []
-            for p in proxies:
-                pass_check, arg = check_vaild_pac(p.split(','))
-                if pass_check:
-                    all_args.append(arg)
-            to_str = '"' + '; '.join(all_args) + '"'
-            command = shlex.split(
-                            'genpac --gfwlist-url="-" ' +
-                            '--gfwlist-local=' +
-                            current_app.config['TXTLIST_PTAH'] +
-                            ' -p ' +
-                            to_str +
-                            ' --user-rule="||naver.jp"')
+    if len(proxies) <= PAC_MAX_CHAIN_PROXIES: # allow max 10 chain proxies
+        all_args = []
+        for p in proxies:
+            pass_check, arg = check_and_parse_pac_args(p.split(','))
+            if pass_check:
+                all_args.append(arg)
+            else:
+                abort(404)
 
-            return maek_resp_from_stdout(command, 'gfwlist.pac')
-        abort(404)
-    except:
-        abort(404)
-
-
-def check_vaild_pac(type_addr):
-    pass_check, arg = False, None
-    if len(type_addr) == 2:
-        p_type = type_addr[0]
-        addr = type_addr[1]
-        if p_type in ['h', 's'] and check_addr(*addr.split(':')):
-            pass_check = True
-            arg = create_proxy_arg(p_type, addr)
-    return pass_check, arg
+        if all_args:
+            command = shlex.split(' '.join([
+                                'genpac --gfwlist-url="-"',
+                                '--gfwlist-local=' + current_app.config['TXTLIST_PTAH'],
+                                '-p',
+                                ''.join(['"', '; '.join(all_args), '"']),
+                                '--user-rule="||naver.jp"',
+                    ]))
+            return make_resp_with_cmd_stdout(command, 'gfwlist.pac')
+    abort(404)
 
 
 def check_addr(ip, port):
@@ -124,13 +107,22 @@ def check_addr(ip, port):
     return pass_check
 
 
-def create_proxy_arg(p_type, addr):
-    arg = ''
-    if p_type == 's':
-        arg = 'SOCKS5 ' + addr + '; ' + 'SOCKS ' + addr
-    else:
-        arg = 'PROXY ' + addr
-    return arg
+def check_and_parse_pac_args(type_addr):
+    pass_check, arg = False, None
+    if len(type_addr) == 2:
+        proxy_type, addr = type_addr
+        if proxy_type in ['h', 's'] and check_addr(*addr.split(':')):
+            pass_check = True
+            arg = create_proxy_arg(proxy_type, addr)
+    return pass_check, arg
+
+
+def create_proxy_arg(proxy_type, addr):
+    args = {
+        's': ['SOCKS5 ', addr, '; ', 'SOCKS ', addr],
+        'h': ['PROXY ', addr],
+    }
+    return ''.join(args[proxy_type])
 
 
 if __name__ == '__main__':
