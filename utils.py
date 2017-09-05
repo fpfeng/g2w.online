@@ -1,4 +1,16 @@
+from functools import wraps
 from werkzeug.routing import BaseConverter
+from flask import abort
+
+
+def abort_when_error(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except:
+            abort(404)
+    return inner
 
 
 class ListConverter(BaseConverter):
