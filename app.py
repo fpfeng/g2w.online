@@ -2,14 +2,14 @@ import subprocess
 import shlex
 import re
 import os
-from flask import Flask, make_response, abort, current_app, render_template
 from IPy import IP
+from flask import Flask, make_response, abort, current_app, render_template
 from utils import ListConverter
 from config import configs
 
 
 app = Flask(__name__)
-app.config.from_object(configs[os.environ.get('g2pconf', 'test')])
+app.config.from_object(configs[os.environ.get('g2wconf', 'dev')])
 app.url_map.converters['list'] = ListConverter
 
 
