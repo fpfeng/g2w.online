@@ -1,5 +1,4 @@
 # coding: utf-8
-import os
 import unittest
 from flask import url_for
 from app import app
