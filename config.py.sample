@@ -1,10 +1,12 @@
 class Base(object):
     TXTLIST_PTAH = '/path/to/gfwlist.txt'
-    G2D_PTAH = '/path/to/g2d/g2d.py' # https://github.com/fpfeng/gfwlist2dnsmasq
+    G2D_PTAH = '/path/to/gfwlist2dnsmasq/gfwlist2dnsmasq.py' # https://github.com/fpfeng/gfwlist2dnsmasq
 
 class Test(Base):
-    DEBUG = True
+    SERVER_NAME = 'localhost'
 
+class Dev(Base):
+    DEBUG = True
 
 class Product(Base):
     pass
@@ -12,5 +14,6 @@ class Product(Base):
 
 configs = {
     'product': Product,
-    'test': Test
+    'test': Test,
+    'dev': Dev,
 }
